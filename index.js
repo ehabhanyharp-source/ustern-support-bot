@@ -6,31 +6,47 @@ const bot = new Telegraf('8840523796:AAEAFM5-MBd5Eq2DFBv3WQPjTjXT5V-XOOI');
 const app = express();
 app.use(express.json());
 
-// إضافة لضمان عمل البوت على Vercel ومنع خطأ Cannot GET /
+// مسار أساسي لعمل البوت على Vercel
 app.get('/', (req, res) => res.send('Ustern Support Bot is Active!'));
 app.post('/api/webhook', (req, res) => { bot.handleUpdate(req.body); res.sendStatus(200); });
 
 // ==========================================
-// قاعدة بيانات المشاكل والحلول الشاملة
+// قاعدة بيانات المشاكل والحلول الشاملة (النصوص الأصلية)
 // ==========================================
 const productsData = {
-    netflix: { name: '🎬 Netflix', problems: [
-        { id: 'net_1', btn: '🔐 الباسورد غلط / الحساب مقفل', title: 'الباسورد غلط أو الحساب مقفل', steps: '1. تأكد من نسخ الإيميل والباسورد بدقة بدون أي مسافات زائدة.\n2. تأكد من أنك لم تقم بتغيير أي بيانات في الحساب.' },
-        { id: 'net_2', btn: '📺 حد الشاشات (Too Many Screens)', title: 'حد الشاشات الأقصى', steps: '1. هذا يعني أن هناك ضغط مؤقت.\n2. يرجى الانتظار من 5 إلى 10 دقائق.' },
-        { id: 'net_3', btn: '🌐 اللغة والترجمة', title: 'تغير اللغة أو الترجمة العربية', steps: '1. ادخل لإعدادات الحساب من المتصفح.\n2. اختر العربية من خيارات اللغة.' }
-    ]},
-    shahid: { name: '🌟 Shahid VIP', problems: [
-        { id: 'sha_1', btn: '🆓 الحساب رجع مجاني', title: 'الحساب رجع مجاني', steps: '1. سجل خروج وأغلق التطبيق.\n2. أعد تسجيل دخولك.' },
-        { id: 'sha_2', btn: '📱 حد الأجهزة', title: 'حد الأجهزة الأقصى', steps: '1. الحساب يعمل على جهاز واحد فقط.\n2. سجل خروج من أي أجهزة أخرى.' }
-    ]},
-    osn: { name: '📺 OSN+', problems: [
-        { id: 'osn_1', btn: '🔐 كود الدخول', title: 'عدم وصول كود الدخول', steps: '1. تواصل مع الدعم فوراً لإرسال الكود.' },
-        { id: 'osn_2', btn: '🌐 الترجمة', title: 'مشكلة الترجمة واللغة', steps: '1. من علامة (CC) اختر العربية.' }
-    ]},
-    disney: { name: '🏰 Disney+', problems: [
-        { id: 'dis_1', btn: '🔐 الحساب مغلق', title: 'الحساب مغلق أو الباسورد خطأ', steps: '1. انتظر 10 دقائق ثم جرب الدخول مجدداً.' },
-        { id: 'dis_2', btn: '🌐 الترجمة العربية', title: 'اختفاء الترجمة العربية', steps: '1. من إعدادات الصوت اختر العربية.' }
-    ]}
+    netflix: {
+        name: '🎬 Netflix',
+        problems: [
+            { id: 'net_1', btn: '🔐 الباسورد غلط / الحساب مقفل', title: 'الباسورد غلط أو الحساب مقفل', steps: '1. تأكد من نسخ الإيميل والباسورد بدقة بدون أي مسافات زائدة.\n2. تأكد من أنك لم تقم بتغيير أي بيانات في الحساب.\n3. إذا استمرت المشكلة، فقد يكون الحساب تحت التحديث المؤقت من المتجر.' },
+            { id: 'net_2', btn: '📺 حد الشاشات (Too Many Screens)', title: 'حد الشاشات الأقصى', steps: '1. هذا يعني أن هناك ضغط مؤقت على الحساب من مستخدمين آخرين.\n2. يرجى الانتظار من 5 إلى 10 دقائق وإعادة المحاولة.\n3. تأكد تماماً من دخولك على الشاشة (Profile) الخاصة بك والمحددة لك فقط عند الشراء.' },
+            { id: 'net_3', btn: '🌐 اللغة تغيرت أو اختفت الترجمة العربية', title: 'تغير اللغة أو الترجمة العربية', steps: '1. ادخل إلى إعدادات الحساب من المتصفح (وليس التطبيق) وقم بتغيير لغة الـ Profile الخاص بك إلى العربية.\n2. أثناء تشغيل الفيديو، اضغط على خيار الصوت والترجمة (Audio & Subtitles) وتأكد من اختيار العربية.' },
+            { id: 'net_4', btn: '💳 يطلب تحديث طريقة الدفع', title: 'رسالة تحديث طريقة الدفع (Update Payment)', steps: '1. هذه المشكلة تظهر أحياناً بسبب فحص تلقائي من نتفليكس.\n2. يرجى عدم القيام بأي خطوة أو إضافة بطاقتك.\n3. تواصل مع الدعم بالأسفل فوراً ليتم تحديث الاشتراك أو تبديل الحساب لك.' }
+        ]
+    },
+    shahid: {
+        name: '🌟 Shahid VIP',
+        problems: [
+            { id: 'sha_1', btn: '🆓 الحساب رجع مجاني (Free)', title: 'الحساب رجع مجاني', steps: '1. قم بعمل تسجيل خروج (Log out) من الحساب داخل التطبيق.\n2. أغلق تطبيق شاهد تماماً (احذفه من الخلفية).\n3. أعد تشغيل التطبيق وسجل دخولك مجدداً بنفس البيانات المرسلة لك بدقة.' },
+            { id: 'sha_2', btn: '📱 حد الأجهزة المشغلة (Device Limit)', title: 'حد الأجهزة الأقصى', steps: '1. سياسة متجرنا تمنحك تشغيل الحساب على (جهاز واحد فقط) في نفس الوقت.\n2. يرجى تسجيل الخروج من أي أجهزة أخرى قمت بالدخول منها.\n3. انتظر 5 دقائق ثم أعد تشغيل الفيديو.' },
+            { id: 'sha_3', btn: '🌐 واجهة التطبيق بالإنجليزية / مشكلة لغة', title: 'تغيير لغة واجهة تطبيق شاهد والترجمة', steps: '1. من القائمة الجانبية للتطبيق، اضغط على "الملف الشخصي" أو "الإعدادات".\n2. ستجد خيار "اللغة" (Language)، قم بتحويله إلى العربية.\n3. إذا كانت المشكلة في لغة الصوت أثناء الفيلم، اضغط على علامة الميكروفون أسفل الشاشة واختر الصوت الأصلي أو الدبلجة العربية.' }
+        ]
+    },
+    osn: {
+        name: '📺 OSN+',
+        problems: [
+            { id: 'osn_1', btn: '🔐 كود الدخول لا يصل للموبايل', title: 'عدم وصول كود الدخول / التحقق', steps: '1. إذا كان الحساب يعتمد على كود الموبايل، يرجى التواصل مع الدعم بالأسفل فوراً لإرسال الكود لك حياً.\n2. يفضل تسجيل الدخول عبر الإيميل والباسورد المباشرين إن توفروا.' },
+            { id: 'osn_2', btn: '🌐 الترجمة غير متطابقة أو اللغة إنجليزية', title: 'مشكلة الترجمة واللغة في OSN+', steps: '1. افتح الفيديو الذي ترغب في مشاهدته.\n2. اضغط على علامة (CC) أو خيار الترجمة والصوت الموجود أسفل مشغل الفيديو.\n3. اختر اللغة العربية للترجمة (Subtitles)، واجعل الصوت (Audio) باللغة الأصلية أو العربية حسب رغبتك.' },
+            { id: 'osn_3', btn: '🔄 الحساب معلق / يطلب اشتراك', title: 'الحساب معلق أو يطلب التجديد', steps: '1. قم بعمل تسجيل خروج ثم إعادة تسجيل الدخول.\n2. إذا استمرت رسالة الاشتراك، فإن الحساب يحتاج لإعادة تفعيل من طرفنا، يرجى إرسال لقطة شاشة للدعم بالأسفل.' }
+        ]
+    },
+    disney: {
+        name: '🏰 Disney+',
+        problems: [
+            { id: 'dis_1', btn: '🔐 الحساب مغلق / الباسورد غير صحيح', title: 'الحساب مغلق أو الباسورد خطأ', steps: '1. ديزني تقوم أحياناً بحظر مؤقت للـ IP عند المحاولات الكثيرة.\n2. انتظر 10 دقائق ثم جرب الدخول مرة أخرى بدقة وبدون مسافات بالرقم السري.' },
+            { id: 'dis_2', btn: '🌐 الترجمة العربية أو الدبلجة مفقودة', title: 'اختفاء الترجمة أو الدبلجة العربية في ديزني', steps: '1. أثناء تشغيل الفيلم، اضغط على علامة المربع/الترس الخاصة بالإعدادات (أعلى أو أسفل الشاشة).\n2. توجه إلى خيار (Audio) للدبلجة واختر العربية، أو (Subtitles) للترجمة المكتوبة.\n3. ملحوظة: بعض الأفلام القديمة جداً قد لا تتوفر لها دبلجة عربية من المصدر، لكن الترجمة متوفرة دائماً.' },
+            { id: 'dis_3', btn: '🚫 هذا المحتوى غير متوفر في بلدك', title: 'رسالة المحتوى غير متوفر بالمنطقة', steps: '1. تأكد من إغلاق أي تطبيق VPN تماماً.\n2. إذا كنت خارج الدول العربية، قد تحتاج لتشغيل VPN على دولة عربية (مصر أو السعودية) ليعمل الحساب المخصص للشرق الأوسط.' }
+        ]
+    }
 };
 
 const productsList = Object.keys(productsData);
@@ -39,45 +55,51 @@ const productsList = Object.keys(productsData);
 // الواجهة الرئيسية
 // ==========================================
 bot.start((ctx) => {
-    return ctx.reply(`👋 أهلاً بك يا ${ctx.from.first_name} في بوت دعم Ustern!`, Markup.inlineKeyboard([
-        [Markup.button.callback('❓ حلول المشاكل', 'faq')],
-        [Markup.button.callback('🛒 الأسعار', 'pricing')],
-        [Markup.button.callback('⚖️ شروط الضمان', 'terms')]
-    ]));
+    return ctx.reply(`👋 أهلاً بك يا ${ctx.from.first_name} في بوت الدعم الذكي لـ <b>Ustern</b>!\n\n🤖 أنا هنا لمساعدتك فوراً. يرجى اختيار القسم المناسب:`, {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('❓ حلول المشاكل والأسئلة الشائعة', 'faq')],
+            [Markup.button.callback('🛒 أسعار الاشتراكات وطرق الدفع', 'pricing')],
+            [Markup.button.callback('⚖️ شروط الاستخدام وسياسة الضمان', 'terms')]
+        ])
+    });
 });
 
 bot.action('faq', (ctx) => {
     ctx.answerCbQuery();
     const buttons = productsList.map(p => [Markup.button.callback(productsData[p].name, 'prod_' + p)]);
     buttons.push([Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]);
-    return ctx.reply("🛍️ اختر المنتج:", Markup.inlineKeyboard(buttons));
+    return ctx.editMessageText("🛍️ اختر المنتج الذي تواجه مشكلة فيه:", Markup.inlineKeyboard(buttons));
 });
 
 productsList.forEach(key => {
     bot.action('prod_' + key, (ctx) => {
         ctx.answerCbQuery();
         const btns = productsData[key].problems.map(p => [Markup.button.callback(p.btn, 'err_' + p.id)]);
-        btns.push([Markup.button.callback('🔙 عودة', 'faq')]);
-        return ctx.reply(`اختر مشكلة في ${productsData[key].name}:`, Markup.inlineKeyboard(btns));
+        btns.push([Markup.button.callback('🔙 العودة للمنتجات', 'faq')]);
+        return ctx.editMessageText(`يرجى تحديد المشكلة في ${productsData[key].name}:`, Markup.inlineKeyboard(btns));
     });
 
     productsData[key].problems.forEach(p => {
         bot.action('err_' + p.id, (ctx) => {
             ctx.answerCbQuery();
-            return ctx.reply(`🛠️ ${p.title}:\n\n${p.steps}`, Markup.inlineKeyboard([
-                [Markup.button.callback('📞 تواصل مع الدعم', 'human_support')],
-                [Markup.button.callback('⬅️ عودة', 'prod_' + key)]
-            ]));
+            return ctx.editMessageText(`🛠️ <b>حل مشكلة (${p.title}) لـ ${productsData[key].name}:</b>\n\n${p.steps}\n\n💡 إذا لم تُحل المشكلة، تحدث مع الدعم:`, {
+                parse_mode: 'HTML',
+                ...Markup.inlineKeyboard([
+                    [Markup.button.callback('📞 لم تحل المشكلة (تحدث مع الدعم)', 'human_support')],
+                    [Markup.button.callback('⬅️ العودة لمشاكل المنتج', 'prod_' + key)]
+                ])
+            });
         });
     });
 });
 
 // ==========================================
-// الدعم البشري (مُحدث بالشروط)
+// الدعم البشري (مع الشروط الأصلية المطلوبة)
 // ==========================================
 bot.action('human_support', (ctx) => {
     ctx.answerCbQuery();
-    return ctx.reply(`🎯 <b>تم تحويلك للدعم البشري:</b>
+    return ctx.editMessageText(`🎯 <b>تم تحويلك للدعم البشري بـ Ustern:</b>
 
 <b>⚠️ شروط التحدث مع الدعم:</b>
 1. الالتزام بالاحترام المتبادل.
@@ -93,13 +115,41 @@ bot.action('human_support', (ctx) => {
     });
 });
 
-bot.action('pricing', (ctx) => ctx.editMessageText("🛒 الأسعار: تواصل معنا!", Markup.inlineKeyboard([[Markup.button.callback('🔙 عودة', 'back_home')]])));
-bot.action('terms', (ctx) => ctx.editMessageText("⚖️ الضمان: استبدال فوري.", Markup.inlineKeyboard([[Markup.button.callback('🔙 عودة', 'back_home')]])));
-bot.action('back_home', (ctx) => ctx.editMessageText("👋 أهلاً بك!", Markup.inlineKeyboard([
-    [Markup.button.callback('❓ حلول المشاكل', 'faq')],
-    [Markup.button.callback('🛒 الأسعار', 'pricing')],
-    [Markup.button.callback('⚖️ شروط الضمان', 'terms')]
-])));
+// ==========================================
+// الأسعار والشروط (النصوص الأصلية)
+// ==========================================
+bot.action('pricing', (ctx) => { 
+    ctx.answerCbQuery(); 
+    return ctx.editMessageText("🛒 <b>قائمة الأسعار وطرق الدفع بـ Ustern:</b>\n\n- اشتراك Netflix شهري: (اكتب السعر)\n- اشتراك Shahid VIP شهري: (اكتب السعر)\n- بقية الاشتراكات متوفرة بأفضل الأسعار الممكنة!\n\n💳 طرق الدفع المتوفرة: فودافون كاش، إنستا باي، بطاقات بنكية.", { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]]) }); 
+});
+
+bot.action('terms', (ctx) => { 
+    ctx.answerCbQuery(); 
+    const termsTxt = "⚖️ <b>سياسة الاستبدال، الإسترجاع، والضمان لمتجر Ustern:</b>\n\n" +
+                     "🛑 <b>1. طبيعة المنتجات الرقمية (منع الاسترجاع أو الاستبدال):</b>\n" +
+                     "• نظرًا لأن جميع الخدمات والسلع المقدمة في متجرنا هي منتجات رقمية واشتراكات فورية يُكشف عنها بمجرد التسليم، فإنه لا يُسمح بالاستبدال أو الاسترجاع النقدي نهائيًا.\n" +
+                     "• ⚠️ <b>تنبيه هام جداً:</b> لا يحق للعميل إلغاء الطلب أو استرجاع الأموال مطلقاً حتى لو كانت حالة الطلب لسه <b>(قيد التجهيز)</b> أو <b>(قيد التنفيذ)</b> في الموقع طالما تم البدء في معالجة طلبك.\n\n" +
+                     "🤝 <b>2. سياسة الضمان والتعويض الذكي (حقوق العميل):</b>\n" +
+                     "• يحق للعميل طلب التعويض الكامل في نفس الخدمة أو المنتج في حالة وجود أي مشاكل فنية أو تقنية تمنعه من استخدام الحساب، وسيتم تسليمه حساب بديل فوراً طوال فترة الضمان الفني المتفق عليها.\n" +
+                     "• في حال تعذر إصلاح المشكلة تماماً من طرفنا، يتم تعويض العميل بمنتج آخر يعادله أو رد قيمة مادية متبقية متوافقة مع فترة الاشتراك.\n\n" +
+                     "❌ <b>3. حالات تسقط حق العميل في التعويض والضمان:</b>\n" +
+                     "• يمنع تماماً تغيير البيانات الأساسية للحساب المشترك (الإيميل، الرمز السري).\n" +
+                     "• الالتزام الكامل بالشاشة المحددة لك ودخول جهاز واحد فقط، ومخالفة الشروط تلغي الضمان تلقائياً بدون تعويض.";
+                     
+    return ctx.editMessageText(termsTxt, { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]]) }); 
+});
+
+bot.action('back_home', (ctx) => {
+    ctx.answerCbQuery();
+    return ctx.editMessageText(`👋 أهلاً بك يا ${ctx.from.first_name} في بوت الدعم الذكي لـ <b>Ustern</b>!\n\n🤖 أنا هنا لمساعدتك فوراً. يرجى اختيار القسم المناسب:`, {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('❓ حلول المشاكل والأسئلة الشائعة', 'faq')],
+            [Markup.button.callback('🛒 أسعار الاشتراكات وطرق الدفع', 'pricing')],
+            [Markup.button.callback('⚖️ شروط الاستخدام وسياسة الضمان', 'terms')]
+        ])
+    });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Bot is running...'));
