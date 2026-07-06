@@ -1,115 +1,105 @@
 const { Telegraf, Markup } = require('telegraf');
 const express = require('express');
 
+// التوكن الخاص بك
 const bot = new Telegraf('8840523796:AAEAFM5-MBd5Eq2DFBv3WQPjTjXT5V-XOOI');
 const app = express();
 app.use(express.json());
 
-// هذا السطر يحل مشكلة الـ Cannot GET / في المتصفح
-app.get('/', (req, res) => {
-    res.send('Ustern Support Bot is Active!');
-});
+// إضافة لضمان عمل البوت على Vercel ومنع خطأ Cannot GET /
+app.get('/', (req, res) => res.send('Ustern Support Bot is Active!'));
+app.post('/api/webhook', (req, res) => { bot.handleUpdate(req.body); res.sendStatus(200); });
 
-app.post('/api/webhook', (req, res) => {
-    bot.handleUpdate(req.body);
-    res.sendStatus(200);
-});
+// ==========================================
+// قاعدة بيانات المشاكل والحلول الشاملة
+// ==========================================
+const productsData = {
+    netflix: { name: '🎬 Netflix', problems: [
+        { id: 'net_1', btn: '🔐 الباسورد غلط / الحساب مقفل', title: 'الباسورد غلط أو الحساب مقفل', steps: '1. تأكد من نسخ الإيميل والباسورد بدقة بدون أي مسافات زائدة.\n2. تأكد من أنك لم تقم بتغيير أي بيانات في الحساب.' },
+        { id: 'net_2', btn: '📺 حد الشاشات (Too Many Screens)', title: 'حد الشاشات الأقصى', steps: '1. هذا يعني أن هناك ضغط مؤقت.\n2. يرجى الانتظار من 5 إلى 10 دقائق.' },
+        { id: 'net_3', btn: '🌐 اللغة والترجمة', title: 'تغير اللغة أو الترجمة العربية', steps: '1. ادخل لإعدادات الحساب من المتصفح.\n2. اختر العربية من خيارات اللغة.' }
+    ]},
+    shahid: { name: '🌟 Shahid VIP', problems: [
+        { id: 'sha_1', btn: '🆓 الحساب رجع مجاني', title: 'الحساب رجع مجاني', steps: '1. سجل خروج وأغلق التطبيق.\n2. أعد تسجيل دخولك.' },
+        { id: 'sha_2', btn: '📱 حد الأجهزة', title: 'حد الأجهزة الأقصى', steps: '1. الحساب يعمل على جهاز واحد فقط.\n2. سجل خروج من أي أجهزة أخرى.' }
+    ]},
+    osn: { name: '📺 OSN+', problems: [
+        { id: 'osn_1', btn: '🔐 كود الدخول', title: 'عدم وصول كود الدخول', steps: '1. تواصل مع الدعم فوراً لإرسال الكود.' },
+        { id: 'osn_2', btn: '🌐 الترجمة', title: 'مشكلة الترجمة واللغة', steps: '1. من علامة (CC) اختر العربية.' }
+    ]},
+    disney: { name: '🏰 Disney+', problems: [
+        { id: 'dis_1', btn: '🔐 الحساب مغلق', title: 'الحساب مغلق أو الباسورد خطأ', steps: '1. انتظر 10 دقائق ثم جرب الدخول مجدداً.' },
+        { id: 'dis_2', btn: '🌐 الترجمة العربية', title: 'اختفاء الترجمة العربية', steps: '1. من إعدادات الصوت اختر العربية.' }
+    ]}
+};
 
+const productsList = Object.keys(productsData);
+
+// ==========================================
+// الواجهة الرئيسية
+// ==========================================
 bot.start((ctx) => {
     return ctx.reply(`👋 أهلاً بك يا ${ctx.from.first_name} في بوت دعم Ustern!`, Markup.inlineKeyboard([
         [Markup.button.callback('❓ حلول المشاكل', 'faq')],
-        [Markup.button.callback('🛒 الأسعار وطرق الدفع', 'pricing')],
+        [Markup.button.callback('🛒 الأسعار', 'pricing')],
         [Markup.button.callback('⚖️ شروط الضمان', 'terms')]
     ]));
 });
 
 bot.action('faq', (ctx) => {
-    return ctx.editMessageText("🛍️ اختر المنتج الذي تواجه مشكلة فيه:", Markup.inlineKeyboard([
-        [Markup.button.callback('🎬 Netflix', 'netflix')],
-        [Markup.button.callback('🌟 Shahid VIP', 'shahid')],
-        [Markup.button.callback('📺 OSN+', 'osn')],
-        [Markup.button.callback('🏰 Disney+', 'disney')],
-        [Markup.button.callback('🔙 عودة للرئيسية', 'back_home')]
-    ]));
+    ctx.answerCbQuery();
+    const buttons = productsList.map(p => [Markup.button.callback(productsData[p].name, 'prod_' + p)]);
+    buttons.push([Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]);
+    return ctx.reply("🛍️ اختر المنتج:", Markup.inlineKeyboard(buttons));
 });
 
-// --- نتفليكس ---
-bot.action('netflix', (ctx) => {
-    return ctx.editMessageText("🛠️ مشاكل Netflix:", Markup.inlineKeyboard([
-        [Markup.button.callback('🔐 الباسورد غلط / الحساب مقفل', 'net_1')],
-        [Markup.button.callback('📺 حد الشاشات (Too Many Screens)', 'net_2')],
-        [Markup.button.callback('🌐 اللغة والترجمة', 'net_3')],
-        [Markup.button.callback('💳 يطلب تحديث طريقة الدفع', 'net_4')],
-        [Markup.button.callback('🔙 عودة للمنتجات', 'faq')]
-    ]));
+productsList.forEach(key => {
+    bot.action('prod_' + key, (ctx) => {
+        ctx.answerCbQuery();
+        const btns = productsData[key].problems.map(p => [Markup.button.callback(p.btn, 'err_' + p.id)]);
+        btns.push([Markup.button.callback('🔙 عودة', 'faq')]);
+        return ctx.reply(`اختر مشكلة في ${productsData[key].name}:`, Markup.inlineKeyboard(btns));
+    });
+
+    productsData[key].problems.forEach(p => {
+        bot.action('err_' + p.id, (ctx) => {
+            ctx.answerCbQuery();
+            return ctx.reply(`🛠️ ${p.title}:\n\n${p.steps}`, Markup.inlineKeyboard([
+                [Markup.button.callback('📞 تواصل مع الدعم', 'human_support')],
+                [Markup.button.callback('⬅️ عودة', 'prod_' + key)]
+            ]));
+        });
+    });
 });
 
-bot.action('net_1', (ctx) => ctx.editMessageText("🛠️ الباسورد غلط أو الحساب مقفل:\n1. تأكد من نسخ الإيميل والباسورد بدقة بدون أي مسافات زائدة.\n2. تأكد من أنك لم تقم بتغيير أي بيانات في الحساب.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'netflix')]])));
-bot.action('net_2', (ctx) => ctx.editMessageText("📺 حد الشاشات الأقصى:\n1. هذا يعني أن هناك ضغط مؤقت.\n2. يرجى الانتظار من 5 إلى 10 دقائق.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'netflix')]])));
-bot.action('net_3', (ctx) => ctx.editMessageText("🌐 تغير اللغة أو الترجمة العربية:\n1. ادخل إلى إعدادات الحساب من المتصفح.\n2. اختر العربية من خيارات اللغة.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'netflix')]])));
-bot.action('net_4', (ctx) => ctx.editMessageText("💳 رسالة تحديث طريقة الدفع:\n1. لا تقم بأي خطوة.\n2. تواصل مع الدعم فوراً.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'netflix')]])));
-
-// --- شاهد ---
-bot.action('shahid', (ctx) => {
-    return ctx.editMessageText("🛠️ مشاكل Shahid VIP:", Markup.inlineKeyboard([
-        [Markup.button.callback('🆓 الحساب رجع مجاني', 'sha_1')],
-        [Markup.button.callback('📱 حد الأجهزة', 'sha_2')],
-        [Markup.button.callback('🌐 اللغة', 'sha_3')],
-        [Markup.button.callback('🔙 عودة للمنتجات', 'faq')]
-    ]));
-});
-
-bot.action('sha_1', (ctx) => ctx.editMessageText("🆓 الحساب رجع مجاني:\n1. سجل خروج وأغلق التطبيق.\n2. أعد تسجيل دخولك.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'shahid')]])));
-bot.action('sha_2', (ctx) => ctx.editMessageText("📱 حد الأجهزة الأقصى:\n1. الحساب يعمل على جهاز واحد فقط.\n2. سجل خروج من أي أجهزة أخرى.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'shahid')]])));
-bot.action('sha_3', (ctx) => ctx.editMessageText("🌐 لغة التطبيق والترجمة:\n1. من الإعدادات اختر اللغة العربية.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'shahid')]])));
-
-// --- OSN ---
-bot.action('osn', (ctx) => {
-    return ctx.editMessageText("🛠️ مشاكل OSN+:", Markup.inlineKeyboard([
-        [Markup.button.callback('🔐 كود الدخول', 'osn_1')],
-        [Markup.button.callback('🌐 الترجمة', 'osn_2')],
-        [Markup.button.callback('🔄 الحساب معلق', 'osn_3')],
-        [Markup.button.callback('🔙 عودة للمنتجات', 'faq')]
-    ]));
-});
-
-bot.action('osn_1', (ctx) => ctx.editMessageText("🔐 عدم وصول كود الدخول:\n1. تواصل مع الدعم فوراً لإرسال الكود.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'osn')]])));
-bot.action('osn_2', (ctx) => ctx.editMessageText("🌐 مشكلة الترجمة واللغة:\n1. من علامة (CC) اختر العربية.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'osn')]])));
-bot.action('osn_3', (ctx) => ctx.editMessageText("🔄 الحساب معلق أو يطلب التجديد:\n1. قم بعمل تسجيل خروج وإعادة دخول.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'osn')]])));
-
-// --- ديزني ---
-bot.action('disney', (ctx) => {
-    return ctx.editMessageText("🛠️ مشاكل Disney+:", Markup.inlineKeyboard([
-        [Markup.button.callback('🔐 الحساب مغلق', 'dis_1')],
-        [Markup.button.callback('🌐 الترجمة العربية', 'dis_2')],
-        [Markup.button.callback('🚫 المنطقة', 'dis_3')],
-        [Markup.button.callback('🔙 عودة للمنتجات', 'faq')]
-    ]));
-});
-
-bot.action('dis_1', (ctx) => ctx.editMessageText("🔐 الحساب مغلق أو الباسورد خطأ:\n1. انتظر 10 دقائق ثم جرب الدخول مجدداً.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'disney')]])));
-bot.action('dis_2', (ctx) => ctx.editMessageText("🌐 اختفاء الترجمة العربية:\n1. من إعدادات الصوت اختر العربية.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'disney')]])));
-bot.action('dis_3', (ctx) => ctx.editMessageText("🚫 المحتوى غير متوفر:\n1. تأكد من إغلاق الـ VPN.", Markup.inlineKeyboard([[Markup.button.callback('📞 تواصل مع الدعم', 'human_support'), Markup.button.callback('⬅️ عودة', 'disney')]])));
-
-// --- الدعم البشري ---
+// ==========================================
+// الدعم البشري (مُحدث بالشروط)
+// ==========================================
 bot.action('human_support', (ctx) => {
-    ctx.deleteMessage().catch(() => {});
-    return ctx.reply("🎯 <b>تم تحويلك للدعم البشري:</b>\n\nأرسل في رسالة واحدة:\n1. رقم الطلب أو الإيميل.\n2. شرح المشكلة بالتفصيل.\n3. صورة (اختياري).\n\nهذه الرسالة ثابتة في انتظار ردك.", { 
+    ctx.answerCbQuery();
+    return ctx.reply(`🎯 <b>تم تحويلك للدعم البشري:</b>
+
+<b>⚠️ شروط التحدث مع الدعم:</b>
+1. الالتزام بالاحترام المتبادل.
+2. توضيح المشكلة بشفافية تامة.
+3. عدم تكرار الرسائل.
+
+<b>أرسل الآن في رسالة واحدة:</b>
+1. رقم الطلب أو الإيميل.
+2. شرح المشكلة بالتفصيل.
+3. صورة للمشكلة (اختياري).`, { 
         parse_mode: 'HTML',
         ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]])
     });
 });
 
-bot.action('back_home', (ctx) => {
-    return ctx.editMessageText(`👋 أهلاً بك يا ${ctx.from.first_name} في بوت دعم Ustern!`, Markup.inlineKeyboard([
-        [Markup.button.callback('❓ حلول المشاكل', 'faq')],
-        [Markup.button.callback('🛒 الأسعار وطرق الدفع', 'pricing')],
-        [Markup.button.callback('⚖️ شروط الضمان', 'terms')]
-    ]));
-});
-
-bot.action('pricing', (ctx) => ctx.editMessageText("🛒 الأسعار: تواصل معنا للتفاصيل!", Markup.inlineKeyboard([[Markup.button.callback('🔙 عودة', 'back_home')]])));
+bot.action('pricing', (ctx) => ctx.editMessageText("🛒 الأسعار: تواصل معنا!", Markup.inlineKeyboard([[Markup.button.callback('🔙 عودة', 'back_home')]])));
 bot.action('terms', (ctx) => ctx.editMessageText("⚖️ الضمان: استبدال فوري.", Markup.inlineKeyboard([[Markup.button.callback('🔙 عودة', 'back_home')]])));
+bot.action('back_home', (ctx) => ctx.editMessageText("👋 أهلاً بك!", Markup.inlineKeyboard([
+    [Markup.button.callback('❓ حلول المشاكل', 'faq')],
+    [Markup.button.callback('🛒 الأسعار', 'pricing')],
+    [Markup.button.callback('⚖️ شروط الضمان', 'terms')]
+])));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Bot is running...'));
