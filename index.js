@@ -1,10 +1,25 @@
 const { Telegraf, Markup } = require('telegraf');
+const express = require('express');
 
-// التوكن الخاص بك
+// التوكن الحقيقي بتاعك مدمج وجاهز
 const bot = new Telegraf('8840523796:AAEAFM5-MBd5Eq2DFBv3WQPjTjXT5V-XOOI');
 
+const app = express();
+app.use(express.json());
+
+// استقبال رسائل التليجرام وتمريرها لكود البوت عبر الـ Webhook الخاص بـ Vercel
+app.post('/api/webhook', (req, res) => {
+    bot.handleUpdate(req.body);
+    res.sendStatus(200);
+});
+
+// صفحة تأكيدية تظهر لك لو فتحت الرابط الأساسي في المتصفح
+app.get('/', (req, res) => {
+    res.send('Ustern Support Bot is running perfectly on Vercel!');
+});
+
 // ==========================================
-// قاعدة بيانات المشاكل والحلول الشاملة (HTML تليجرام)
+// قاعدة بيانات المشاكل والحلول الشاملة (HTML تليجرام) كما هي
 // ==========================================
 const productsData = {
     netflix: {
@@ -202,6 +217,8 @@ bot.action('human_support', (ctx) => {
     return ctx.reply("🎯 <b>تم تحويلك للدعم البشري بـ Ustern:</b>\n\nيرجى كتابة مشكلتك بالتفصيل في رسالة واحدة هنا، وسيقوم الموظف المختص بالرد عليك فوراً للاستبدال أو التعويض. ⏳", { parse_mode: 'HTML' });
 });
 
-bot.launch().then(() => { 
-    console.log("🚀 البوت شغال ونظام الـ HTML مستقر ومظبوط 100%!"); 
+// تشغيل السيرفر على البورت المطلوب لـ Vercel
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
