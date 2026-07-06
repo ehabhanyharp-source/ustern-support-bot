@@ -91,7 +91,7 @@ bot.action('faq', (ctx) => {
         buttons.push(row);
     }
     buttons.push([Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]);
-    return ctx.reply("🛍️ اختر المنتج الذي تواجه مشكلة فيه لعرض الحلول فوراً:", Markup.inlineKeyboard(buttons));
+    return ctx.editMessageText("🛍️ اختر المنتج الذي تواجه مشكلة فيه لعرض الحلول فوراً:", Markup.inlineKeyboard(buttons));
 });
 
 // توليد أزرار المشاكل والردود عليها تلقائياً
@@ -102,7 +102,7 @@ productsList.forEach(key => {
         ctx.answerCbQuery();
         const problemButtons = prod.problems.map(p => [Markup.button.callback(p.btn, 'err_' + p.id)]);
         problemButtons.push([Markup.button.callback('🔙 العودة للمنتجات', 'faq')]);
-        return ctx.reply(`يرجى تحديد المشكلة المحددة التي تواجهها في ${prod.name}:`, Markup.inlineKeyboard(problemButtons));
+        return ctx.editMessageText(`يرجى تحديد المشكلة المحددة التي تواجهها في ${prod.name}:`, Markup.inlineKeyboard(problemButtons));
     });
 
     prod.problems.forEach(p => {
@@ -119,9 +119,13 @@ productsList.forEach(key => {
             };
 
             if (p.image) {
-                return ctx.replyWithPhoto(p.image, { caption: txt, ...extraButtons });
+                // الكولباك مع الصور بيحتاج مسح الرسالة السابقة لعدم التداخل
+                ctx.deleteMessage().then(() => {
+                    ctx.replyWithPhoto(p.image, { caption: txt, ...extraButtons });
+                });
+                return;
             } else {
-                return ctx.reply(txt, extraButtons);
+                return ctx.editMessageText(txt, extraButtons);
             }
         });
     });
@@ -141,13 +145,13 @@ bot.action('guides', (ctx) => {
         buttons.push(row);
     }
     buttons.push([Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]);
-    return ctx.reply("📖 <b>اختر المنتج الذي تريد عرض شروحات التشغيل الخاصة به:</b>", Markup.inlineKeyboard(buttons));
+    return ctx.editMessageText("📖 <b>اختر المنتج الذي تريد عرض شروحات التشغيل الخاصة به:</b>", { parse_mode: 'HTML', ...Markup.inlineKeyboard(buttons) });
 });
 
 productsList.forEach(key => {
     bot.action('guide_' + key, (ctx) => {
         ctx.answerCbQuery();
-        return ctx.reply(`📖 <b>قائمة شروحات ${productsData[key].name}:</b>\nاختر الشرح المحدّد الذي تحتاجه:`, Markup.inlineKeyboard([
+        return ctx.editMessageText(`📖 <b>قائمة شروحات ${productsData[key].name}:</b>\nاختر الشرح المحدّد الذي تحتاجه:`, Markup.inlineKeyboard([
             [Markup.button.callback('📱 طريقة تسجيل الدخول الصحيحة', key + '_g_login')],
             [Markup.button.callback('🎬 طريقة رفع الجودة والوضوح', key + '_g_quality')],
             [Markup.button.callback('🌐 طريقة تغيير اللغة والترجمة', key + '_g_lang')],
@@ -158,19 +162,19 @@ productsList.forEach(key => {
     bot.action(key + '_g_login', (ctx) => {
         ctx.answerCbQuery();
         const txt = `📱 <b>طريقة تسجيل الدخول لـ ${productsData[key].name}:</b>\n\n1. افتح التطبيق أو الموقع الرسمي الخاص بالمنصة.\n2. اكتب الحساب والرمز السري بدقة بدون مسافات إضافية.\n3. ادخل على الشاشة أو الحساب المخصص لك من قِبل متجرنا فقط.`;
-        return ctx.reply(txt, { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ العودة لشروحات المنتج', 'guide_' + key)]]) });
+        return ctx.editMessageText(txt, { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ العودة لشروحات المنتج', 'guide_' + key)]]) });
     });
 
     bot.action(key + '_g_quality', (ctx) => {
         ctx.answerCbQuery();
         const txt = `🎬 <b>طريقة رفع الجودة والوضوح لـ ${productsData[key].name}:</b>\n\n1. توجه إلى قائمة الإعدادات (Settings) داخل الحساب.\n2. اختر إعدادات تشغيل الفيديو والجودة (Playback quality).\n3. اجعل الخيار على الأعلى دائماً (High / Ultra HD / 4K) لضمان أفضل تجربة.`;
-        return ctx.reply(txt, { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ العودة لشروحات المنتج', 'guide_' + key)]]) });
+        return ctx.editMessageText(txt, { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ العودة لشروحات المنتج', 'guide_' + key)]]) });
     });
 
     bot.action(key + '_g_lang', (ctx) => {
         ctx.answerCbQuery();
         const txt = `🌐 <b>طريقة تغيير اللغة والترجمة لـ ${productsData[key].name}:</b>\n\n1. من إعدادات الملف الشخصي (Profile settings)، ابحث عن لغة العرض (Display Language).\n2. اختر اللغة العربية أو الإنجليزية واضغط حفظ.\n3. أثناء تشغيل أي فيديو، اضغط على علامة الصوت والترجمة لتفعيل الترجمة العربية المدمجة تلقائياً.`;
-        return ctx.reply(txt, { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ العودة لشروحات المنتج', 'guide_' + key)]]) });
+        return ctx.editMessageText(txt, { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ العودة لشروحات المنتج', 'guide_' + key)]]) });
     });
 });
 
@@ -179,7 +183,7 @@ productsList.forEach(key => {
 // ==========================================
 bot.action('pricing', (ctx) => { 
     ctx.answerCbQuery(); 
-    return ctx.reply("🛒 <b>قائمة الأسعار وطرق الدفع بـ Ustern:</b>\n\n- اشتراك Netflix شهري: (اكتب السعر)\n- اشتراك Shahid VIP شهري: (اكتب السعر)\n- بقية الاشتراكات متوفرة بأفضل الأسعار الممكنة!\n\n💳 طرق الدفع المتوفرة: فودافون كاش، إنستا باي، بطاقات بنكية.", { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]]) }); 
+    return ctx.editMessageText("🛒 <b>قائمة الأسعار وطرق الدفع بـ Ustern:</b>\n\n- اشتراك Netflix شهري: (اكتب السعر)\n- اشتراك Shahid VIP شهري: (اكتب السعر)\n- بقية الاشتراكات متوفرة بأفضل الأسعار الممكنة!\n\n💳 طرق الدفع المتوفرة: فودافون كاش، إنستا باي، بطاقات بنكية.", { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]]) }); 
 });
 
 bot.action('terms', (ctx) => { 
@@ -195,7 +199,7 @@ bot.action('terms', (ctx) => {
                      "• يمنع تماماً تغيير البيانات الأساسية للحساب المشترك (الإيميل، الرمز السري).\n" +
                      "• الالتزام الكامل بالشاشة المحددة لك ودخول جهاز واحد فقط، ومخالفة الشروط تلغي الضمان تلقائياً بدون تعويض.";
                      
-    return ctx.reply(termsTxt, {
+    return ctx.editMessageText(termsTxt, {
         parse_mode: 'HTML',
         ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]])
     }); 
@@ -203,8 +207,8 @@ bot.action('terms', (ctx) => {
 
 // أزرار العودة والدعم البشري
 bot.action('back_home', (ctx) => {
-    ctx.answerCbQuery(); ctx.deleteMessage();
-    return ctx.reply("🔙 أهلاً بك مجدداً في القائمة الرئيسية:", Markup.inlineKeyboard([
+    ctx.answerCbQuery();
+    return ctx.editMessageText("🔙 أهلاً بك مجدداً في القائمة الرئيسية:", Markup.inlineKeyboard([
         [Markup.button.callback('❓ حلول المشاكل والأسئلة الشائعة', 'faq')],
         [Markup.button.callback('📖 دليل التشغيل والشروحات', 'guides')],
         [Markup.button.callback('🛒 أسعار الاشتراكات وطرق الدفع', 'pricing')],
@@ -214,7 +218,10 @@ bot.action('back_home', (ctx) => {
 
 bot.action('human_support', (ctx) => {
     ctx.answerCbQuery();
-    return ctx.reply("🎯 <b>تم تحويلك للدعم البشري بـ Ustern:</b>\n\nيرجى كتابة مشكلتك بالتفصيل في رسالة واحدة هنا، وسيقوم الموظف المختص بالرد عليك فوراً للاستبدال أو التعويض. ⏳", { parse_mode: 'HTML' });
+    // تحويل للدعم البشري يفضل مسح الأزرار وكتابة رسالة جديدة واضحة
+    ctx.deleteMessage().then(() => {
+        ctx.reply("🎯 <b>تم تحويلك للدعم البشري بـ Ustern:</b>\n\nيرجى كتابة مشكلتك بالتفصيل في رسالة واحدة هنا، وسيقوم الموظف المختص بالرد عليك فوراً للاستبدال أو التعويض. ⏳", { parse_mode: 'HTML' });
+    });
 });
 
 // تشغيل السيرفر على البورت المطلوب لـ Vercel
