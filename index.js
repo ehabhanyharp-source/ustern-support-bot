@@ -1,7 +1,7 @@
 const { Telegraf, Markup } = require('telegraf');
 const express = require('express');
 
-// التوكن الحقيقي بتاعك مدمج وجاهز
+// التوكن الحقيقي وشغال سحابياً
 const bot = new Telegraf('8840523796:AAEAFM5-MBd5Eq2DFBv3WQPjTjXT5V-XOOI');
 
 const app = express();
@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 });
 
 // ==========================================
-// قاعدة بيانات المشاكل والحلول الشاملة (HTML تليجرام) كما هي
+// قاعدة بيانات المشاكل والحلول الشاملة (HTML تليجرام)
 // ==========================================
 const productsData = {
     netflix: {
@@ -35,7 +35,7 @@ const productsData = {
         name: '🌟 Shahid VIP',
         problems: [
             { id: 'sha_1', btn: '🆓 الحساب رجع مجاني (Free)', title: 'الحساب رجع مجاني', steps: '1. قم بعمل تسجيل خروج (Log out) من الحساب داخل التطبيق.\n2. أغلق تطبيق شاهد تماماً (احذفه من الخلفية).\n3. أعد تشغيل التطبيق وسجل دخولك مجدداً بنفس البيانات المرسلة لك بدقة.' },
-            { id: 'sha_2', btn: '📱 حد الأجهزة المشغلة (Device Limit)', title: 'حد الأجهزة الأقصى', steps: '1. سياسة متجرنا تمنحك تشغيل الحساب على (جهاز واحد فقط) في نفس الوقت.\n2. يرجى تسجيل الخروج من أي أجهزة أخرى قمت بالدخول منها.\n3. انتظر 5 دقائق ثم أعد تشغيل الفيديو.' },
+            { id: 'sha_2', btn: '📱 حد الأجراء (Device Limit)', title: 'حد الأجهزة الأقصى', steps: '1. سياسة متجرنا تمنحك تشغيل الحساب على (جهاز واحد فقط) في نفس الوقت.\n2. يرجى تسجيل الخروج من أي أجهزة أخرى قمت بالدخول منها.\n3. انتظر 5 دقائق ثم أعد تشغيل الفيديو.' },
             { id: 'sha_3', btn: '🌐 واجهة التطبيق بالإنجليزية / مشكلة لغة', title: 'تغيير لغة واجهة تطبيق شاهد والترجمة', steps: '1. من القائمة الجانبية للتطبيق، اضغط على "الملف الشخصي" أو "الإعدادات".\n2. ستجد خيار "اللغة" (Language)، قم بتحويله إلى العربية.\n3. إذا كانت المشكلة في لغة الصوت أثناء الفيلم، اضغط على علامة الميكروفون أسفل الشاشة واختر الصوت الأصلي أو الدبلجة العربية.' }
         ]
     },
@@ -60,26 +60,24 @@ const productsData = {
 const productsList = Object.keys(productsData);
 
 // ==========================================
-// الواجهة الرئيسية (Main Keyboard)
+// الواجهة الرئيسية المباشرة (بدون رسالة تهيئة مكررة)
 // ==========================================
 bot.start((ctx) => {
     const firstName = ctx.from.first_name || "عزيزي المستخدم";
     const welcomeMessage = `👋 أهلاً بك يا ${firstName} في بوت الدعم الذكي لـ <b>Ustern</b>!\n\n🤖 أنا هنا لمساعدتك فوراً. يرجى اختيار القسم المناسب:`;
 
-    ctx.reply("🔄 جاري تهيئة البوت الذكي...", { reply_markup: { remove_keyboard: true } }).then(() => {
-        return ctx.reply(welcomeMessage, {
-            parse_mode: 'HTML',
-            ...Markup.inlineKeyboard([
-                [Markup.button.callback('❓ حلول المشاكل والأسئلة الشائعة', 'faq')],
-                [Markup.button.callback('📖 دليل التشغيل والشروحات', 'guides')],
-                [Markup.button.callback('🛒 أسعار الاشتراكات وطرق الدفع', 'pricing')],
-                [Markup.button.callback('⚖️ شروط الاستخدام وسياسة الضمان', 'terms')]
-            ])
-        });
+    return ctx.reply(welcomeMessage, {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('❓ حلول المشاكل والأسئلة الشائعة', 'faq')],
+            [Markup.button.callback('📖 دليل التشغيل والشروحات', 'guides')],
+            [Markup.button.callback('🛒 أسعار الاشتراكات وطرق الدفع', 'pricing')],
+            [Markup.button.callback('⚖️ شروط الاستخدام وسياسة الضمان', 'terms')]
+        ])
     });
 });
 
-// قائمة المنتجات في قسم حلول المشاكل
+// قائمة المنتجات (تعديل في نفس الرسالة)
 bot.action('faq', (ctx) => {
     ctx.answerCbQuery();
     const buttons = [];
@@ -119,7 +117,6 @@ productsList.forEach(key => {
             };
 
             if (p.image) {
-                // الكولباك مع الصور بيحتاج مسح الرسالة السابقة لعدم التداخل
                 ctx.deleteMessage().then(() => {
                     ctx.replyWithPhoto(p.image, { caption: txt, ...extraButtons });
                 });
@@ -154,7 +151,6 @@ productsList.forEach(key => {
         return ctx.editMessageText(`📖 <b>قائمة شروحات ${productsData[key].name}:</b>\nاختر الشرح المحدّد الذي تحتاجه:`, Markup.inlineKeyboard([
             [Markup.button.callback('📱 طريقة تسجيل الدخول الصحيحة', key + '_g_login')],
             [Markup.button.callback('🎬 طريقة رفع الجودة والوضوح', key + '_g_quality')],
-            [Markup.button.callback('🌐 طريقة تغيير اللغة والترجمة', key + '_g_lang')],
             [Markup.button.callback('🔙 العودة لقائمة الشروحات', 'guides')]
         ]));
     });
@@ -170,12 +166,6 @@ productsList.forEach(key => {
         const txt = `🎬 <b>طريقة رفع الجودة والوضوح لـ ${productsData[key].name}:</b>\n\n1. توجه إلى قائمة الإعدادات (Settings) داخل الحساب.\n2. اختر إعدادات تشغيل الفيديو والجودة (Playback quality).\n3. اجعل الخيار على الأعلى دائماً (High / Ultra HD / 4K) لضمان أفضل تجربة.`;
         return ctx.editMessageText(txt, { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ العودة لشروحات المنتج', 'guide_' + key)]]) });
     });
-
-    bot.action(key + '_g_lang', (ctx) => {
-        ctx.answerCbQuery();
-        const txt = `🌐 <b>طريقة تغيير اللغة والترجمة لـ ${productsData[key].name}:</b>\n\n1. من إعدادات الملف الشخصي (Profile settings)، ابحث عن لغة العرض (Display Language).\n2. اختر اللغة العربية أو الإنجليزية واضغط حفظ.\n3. أثناء تشغيل أي فيديو، اضغط على علامة الصوت والترجمة لتفعيل الترجمة العربية المدمجة تلقائياً.`;
-        return ctx.editMessageText(txt, { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('⬅️ العودة لشروحات المنتج', 'guide_' + key)]]) });
-    });
 });
 
 // ==========================================
@@ -183,7 +173,7 @@ productsList.forEach(key => {
 // ==========================================
 bot.action('pricing', (ctx) => { 
     ctx.answerCbQuery(); 
-    return ctx.editMessageText("🛒 <b>قائمة الأسعار وطرق الدفع بـ Ustern:</b>\n\n- اشتراك Netflix شهري: (اكتب السعر)\n- اشتراك Shahid VIP شهري: (اكتب السعر)\n- بقية الاشتراكات متوفرة بأفضل الأسعار الممكنة!\n\n💳 طرق الدفع المتوفرة: فودافون كاش، إنستا باي، بطاقات بنكية.", { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]]) }); 
+    return ctx.editMessageText("🛒 <b>قائمة الأسعار وطرق الدفع بـ Ustern:</b>\n\n- اشتراك Netflix شهري: متوفر بأفضل سعر\n- اشتراك Shahid VIP شهري: متوفر بأفضل سعر\n\n💳 طرق الدفع المتوفرة: فودافون كاش، إنستا باي، بطاقات بنكية.", { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]]) }); 
 });
 
 bot.action('terms', (ctx) => { 
@@ -218,7 +208,6 @@ bot.action('back_home', (ctx) => {
 
 bot.action('human_support', (ctx) => {
     ctx.answerCbQuery();
-    // تحويل للدعم البشري يفضل مسح الأزرار وكتابة رسالة جديدة واضحة
     ctx.deleteMessage().then(() => {
         ctx.reply("🎯 <b>تم تحويلك للدعم البشري بـ Ustern:</b>\n\nيرجى كتابة مشكلتك بالتفصيل في رسالة واحدة هنا، وسيقوم الموظف المختص بالرد عليك فوراً للاستبدال أو التعويض. ⏳", { parse_mode: 'HTML' });
     });
