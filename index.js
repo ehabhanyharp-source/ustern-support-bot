@@ -6,15 +6,17 @@ const app = express();
 
 app.use(express.json());
 
-// مسارات للتأكد من عمل السيرفر
+// مسار للتحقق من عمل السيرفر
 app.get('/', (req, res) => res.send('Ustern Support Bot is Active!'));
+
+// المسار الذي يستقبل رسائل تليجرام - بدون bot.launch
 app.post('/api/webhook', (req, res) => {
     bot.handleUpdate(req.body);
     res.sendStatus(200);
 });
 
 // ==========================================
-// قاعدة البيانات (النصوص الأصلية)
+// قاعدة البيانات والمنطق (كما هي)
 // ==========================================
 const productsData = {
     netflix: { name: '🎬 Netflix', problems: [
@@ -40,17 +42,11 @@ const productsData = {
     ]}
 };
 
-// ==========================================
-// منطق البوت
-// ==========================================
-bot.start((ctx) => ctx.reply(`👋 أهلاً بك يا ${ctx.from.first_name} في بوت الدعم الذكي لـ Ustern!`, {
-    parse_mode: 'HTML',
-    ...Markup.inlineKeyboard([
-        [Markup.button.callback('❓ حلول المشاكل والأسئلة الشائعة', 'faq')],
-        [Markup.button.callback('🛒 أسعار الاشتراكات وطرق الدفع', 'pricing')],
-        [Markup.button.callback('⚖️ شروط الاستخدام وسياسة الضمان', 'terms')]
-    ])
-}));
+bot.start((ctx) => ctx.reply(`👋 أهلاً بك يا ${ctx.from.first_name} في بوت الدعم الذكي لـ <b>Ustern</b>!`, { parse_mode: 'HTML', ...Markup.inlineKeyboard([
+    [Markup.button.callback('❓ حلول المشاكل والأسئلة الشائعة', 'faq')],
+    [Markup.button.callback('🛒 أسعار الاشتراكات وطرق الدفع', 'pricing')],
+    [Markup.button.callback('⚖️ شروط الاستخدام وسياسة الضمان', 'terms')]
+])}));
 
 bot.action('faq', (ctx) => {
     ctx.answerCbQuery();
@@ -70,55 +66,30 @@ Object.keys(productsData).forEach(key => {
     productsData[key].problems.forEach(p => {
         bot.action('err_' + p.id, (ctx) => {
             ctx.answerCbQuery();
-            ctx.editMessageText(`🛠️ <b>حل مشكلة (${p.title}) لـ ${productsData[key].name}:</b>\n\n${p.steps}\n\n💡 إذا لم تُحل المشكلة، تحدث مع الدعم:`, {
-                parse_mode: 'HTML',
-                ...Markup.inlineKeyboard([
-                    [Markup.button.callback('📞 لم تحل المشكلة (تحدث مع الدعم)', 'human_support')],
-                    [Markup.button.callback('⬅️ العودة لمشاكل المنتج', 'prod_' + key)]
-                ])
-            });
+            ctx.editMessageText(`🛠️ <b>حل مشكلة (${p.title}) لـ ${productsData[key].name}:</b>\n\n${p.steps}\n\n💡 إذا لم تُحل المشكلة، تحدث مع الدعم:`, { parse_mode: 'HTML', ...Markup.inlineKeyboard([
+                [Markup.button.callback('📞 لم تحل المشكلة (تحدث مع الدعم)', 'human_support')],
+                [Markup.button.callback('⬅️ العودة لمشاكل المنتج', 'prod_' + key)]
+            ])});
         });
     });
 });
 
 bot.action('human_support', (ctx) => {
     ctx.answerCbQuery();
-    ctx.editMessageText(`🎯 <b>تم تحويلك للدعم البشري بـ Ustern:</b>\n\n<b>⚠️ شروط التحدث مع الدعم:</b>\n1. الالتزام بالاحترام المتبادل.\n2. توضيح المشكلة بشفافية تامة.\n3. عدم تكرار الرسائل.\n\n<b>أرسل الآن في رسالة واحدة:</b>\n1. رقم الطلب أو الإيميل.\n2. شرح المشكلة بالتفصيل.\n3. صورة للمشكلة (اختياري).`, { 
-        parse_mode: 'HTML',
-        ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]])
-    });
+    ctx.editMessageText(`🎯 <b>تم تحويلك للدعم البشري بـ Ustern:</b>\n\n<b>⚠️ شروط التحدث مع الدعم:</b>\n1. الالتزام بالاحترام المتبادل.\n2. توضيح المشكلة بشفافية تامة.\n3. عدم تكرار الرسائل.\n\n<b>أرسل الآن في رسالة واحدة:</b>\n1. رقم الطلب أو الإيميل.\n2. شرح المشكلة بالتفصيل.\n3. صورة للمشكلة (اختياري).`, { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]]) });
 });
 
-bot.action('pricing', (ctx) => { 
-    ctx.answerCbQuery(); 
-    ctx.editMessageText("🛒 <b>قائمة الأسعار وطرق الدفع بـ Ustern:</b>\n\n- اشتراك Netflix شهري: (اكتب السعر)\n- اشتراك Shahid VIP شهري: (اكتب السعر)\n- بقية الاشتراكات متوفرة بأفضل الأسعار الممكنة!\n\n💳 طرق الدفع المتوفرة: فودافون كاش، إنستا باي، بطاقات بنكية.", { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]]) }); 
-});
+bot.action('pricing', (ctx) => { ctx.answerCbQuery(); ctx.editMessageText("🛒 <b>قائمة الأسعار وطرق الدفع بـ Ustern:</b>\n\n- اشتراك Netflix شهري: (اكتب السعر)\n- اشتراك Shahid VIP شهري: (اكتب السعر)\n- بقية الاشتراكات متوفرة بأفضل الأسعار الممكنة!\n\n💳 طرق الدفع المتوفرة: فودافون كاش، إنستا باي، بطاقات بنكية.", { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]]) }); });
 
-bot.action('terms', (ctx) => { 
-    ctx.answerCbQuery(); 
-    const termsTxt = "⚖️ <b>سياسة الاستبدال، الإسترجاع، والضمان لمتجر Ustern:</b>\n\n" +
-                     "🛑 <b>1. طبيعة المنتجات الرقمية (منع الاسترجاع أو الاستبدال):</b>\n" +
-                     "• نظرًا لأن جميع الخدمات والسلع المقدمة في متجرنا هي منتجات رقمية واشتراكات فورية يُكشف عنها بمجرد التسليم، فإنه لا يُسمح بالاستبدال أو الاسترجاع النقدي نهائيًا.\n" +
-                     "• ⚠️ <b>تنبيه هام جداً:</b> لا يحق للعميل إلغاء الطلب أو استرجاع الأموال مطلقاً حتى لو كانت حالة الطلب لسه (قيد التجهيز) أو (قيد التنفيذ) في الموقع طالما تم البدء في معالجة طلبك.\n\n" +
-                     "🤝 <b>2. سياسة الضمان والتعويض الذكي (حقوق العميل):</b>\n" +
-                     "• يحق للعميل طلب التعويض الكامل في نفس الخدمة أو المنتج في حالة وجود أي مشاكل فنية أو تقنية تمنعه من استخدام الحساب، وسيتم تسليمه حساب بديل فوراً طوال فترة الضمان الفني المتفق عليها.\n" +
-                     "• في حال تعذر إصلاح المشكلة تماماً من طرفنا، يتم تعويض العميل بمنتج آخر يعادله أو رد قيمة مادية متبقية متوافقة مع فترة الاشتراك.\n\n" +
-                     "❌ <b>3. حالات تسقط حق العميل في التعويض والضمان:</b>\n" +
-                     "• يمنع تماماً تغيير البيانات الأساسية للحساب المشترك (الإيميل، الرمز السري).\n" +
-                     "• الالتزام الكامل بالشاشة المحددة لك ودخول جهاز واحد فقط، ومخالفة الشروط تلغي الضمان تلقائياً بدون تعويض.";
-    ctx.editMessageText(termsTxt, { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]]) }); 
-});
+bot.action('terms', (ctx) => { ctx.answerCbQuery(); const termsTxt = "⚖️ <b>سياسة الاستبدال، الإسترجاع، والضمان لمتجر Ustern:</b>\n\n🛑 <b>1. طبيعة المنتجات الرقمية (منع الاسترجاع أو الاستبدال):</b>\n• نظرًا لأن جميع الخدمات والسلع المقدمة في متجرنا هي منتجات رقمية واشتراكات فورية يُكشف عنها بمجرد التسليم، فإنه لا يُسمح بالاستبدال أو الاسترجاع النقدي نهائيًا.\n\n🤝 <b>2. سياسة الضمان والتعويض الذكي (حقوق العميل):</b>\n• يحق للعميل طلب التعويض الكامل في نفس الخدمة أو المنتج في حالة وجود أي مشاكل فنية أو تقنية تمنعه من استخدام الحساب، وسيتم تسليمه حساب بديل فوراً طوال فترة الضمان الفني المتفق عليها.\n\n❌ <b>3. حالات تسقط حق العميل في التعويض والضمان:</b>\n• يمنع تماماً تغيير البيانات الأساسية للحساب المشترك (الإيميل، الرمز السري).\n• الالتزام الكامل بالشاشة المحددة لك ودخول جهاز واحد فقط، ومخالفة الشروط تلغي الضمان تلقائياً بدون تعويض."; ctx.editMessageText(termsTxt, { parse_mode: 'HTML', ...Markup.inlineKeyboard([[Markup.button.callback('🔙 العودة للرئيسية', 'back_home')]]) }); });
 
 bot.action('back_home', (ctx) => {
     ctx.answerCbQuery();
-    ctx.editMessageText(`👋 أهلاً بك يا ${ctx.from.first_name} في بوت الدعم الذكي لـ <b>Ustern</b>!\n\n🤖 أنا هنا لمساعدتك فوراً. يرجى اختيار القسم المناسب:`, {
-        parse_mode: 'HTML',
-        ...Markup.inlineKeyboard([
-            [Markup.button.callback('❓ حلول المشاكل والأسئلة الشائعة', 'faq')],
-            [Markup.button.callback('🛒 أسعار الاشتراكات وطرق الدفع', 'pricing')],
-            [Markup.button.callback('⚖️ شروط الاستخدام وسياسة الضمان', 'terms')]
-        ])
-    });
+    ctx.editMessageText(`👋 أهلاً بك يا ${ctx.from.first_name} في بوت الدعم الذكي لـ <b>Ustern</b>!`, { parse_mode: 'HTML', ...Markup.inlineKeyboard([
+        [Markup.button.callback('❓ حلول المشاكل والأسئلة الشائعة', 'faq')],
+        [Markup.button.callback('🛒 أسعار الاشتراكات وطرق الدفع', 'pricing')],
+        [Markup.button.callback('⚖️ شروط الاستخدام وسياسة الضمان', 'terms')]
+    ])});
 });
 
 module.exports = app;
